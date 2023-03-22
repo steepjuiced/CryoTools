@@ -11,14 +11,18 @@ different shape, you may need to modify the scipt accordingly.
 permissive=True is used to allow reading of non-standard MRC files. If your MRC stack is a standard file, you can oomit this argument.
 """
 
+import argparse
 import mrcfile
 import numpy as np
 
-# Get the desired number of chunks from the user
-num_chunks = int(input('Enter the number of chunks to split the stack into: '))
+# Parse command line argument
+parser = argparse.ArgumentParser()
+parser.add_argument('--input', required=True, help='Input MRCS file')
+parser.add_argument('--chunks', required=True, type=int, help='Number of chunks to bin the images into')
+args = parser.parse_args()
 
 # Open the MRC stack
-with mrcfile.open('input.mrcs', permissive=True) as mrc:
+with mrcfile.open(args.input, permissive=True) as mrc:
     # Read the data and shape
     # Debug :
     # mrc.print_header()
@@ -40,10 +44,10 @@ with mrcfile.open('input.mrcs', permissive=True) as mrc:
         print(f"The number of images in the MRC stack is {shape[2]}")
 
     # Calculate the length of each chunk
-    chunk_length = num_images // num_chunks
+    chunk_length = num_images // args.chunks
 
     # Loop through each chunk
-    for i in range(num_chunks):
+    for i in range(args.chunks):
         # Calculate start and end indices for current chunk
         start_index = i * chunk_length
         end_index = start_index + chunk_length
@@ -52,7 +56,7 @@ with mrcfile.open('input.mrcs', permissive=True) as mrc:
         images = mrc.data[start_index:end_index]
 
         # Bin images
-        binned_images = np.mean(images.reshape((-1, x_size, y_size)), axis=1)
+        binned_images = np.mean(images.reshape((-1, 2, x_size, y_size)), axis=1)
 
         # Write binned images to new MRC stack file
         with mrcfile.new(f'chunk_{i}.mrcs', overwrite=True) as new_mrc:
