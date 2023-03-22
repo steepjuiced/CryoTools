@@ -48,5 +48,3 @@ with mrcfile.open(args.input, permissive=True) as mrc:
         chunk_filename = os.path.join(output_dir, f"chunk_{i+1}.mrcs")
         with mrcfile.new(chunk_filename, overwrite=True) as mrc:
             mrc.set_data(np.squeeze(chunk_data))
-            #mrc.set_header(mrc_header)
-            #mrc.header.nz = chunk_size
