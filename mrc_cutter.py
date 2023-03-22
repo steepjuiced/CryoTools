@@ -12,6 +12,7 @@ permissive=True is used to allow reading of non-standard MRC files. If your MRC 
 """
 
 import argparse
+import os
 import mrcfile
 import numpy as np
 
@@ -27,37 +28,25 @@ with mrcfile.open(args.input, permissive=True) as mrc:
     # Debug :
     # mrc.print_header()
     data = mrc.data
-    shape = mrc.data.shape
+    nx, ny, nz = mrc.data.shape
+    mrc_header = mrc.header
 
-    # Get the number of images in the mrc file and image dimensions
-    if shape[1] == shape[2]:
-        print('The X and Y dimensions are equal')
-        print(f"The images are {shape[1]} x {shape[2]}")
-        print(f"The number of images in the MRC stack is {shape[0]}")
-        x_size = shape[1]
-        y_size = x_size
-        num_images = shape[0]
-    else:
-        num_images = shape[2]
-        x_size = shape[0]
-        y_size = x_size
-        print(f"The number of images in the MRC stack is {shape[2]}")
+    # Calculate the number of images in each chunk
+    chunk_size = nz // args.chunks
 
-    # Calculate the length of each chunk
-    chunk_length = num_images // args.chunks
+    # Create the output directory if it does not exist
+    output_dir = os.path.splitext(args.input)[0]
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
 
     # Loop through each chunk
     for i in range(args.chunks):
         # Calculate start and end indices for current chunk
-        start_index = i * chunk_length
-        end_index = start_index + chunk_length
-
-        # Read images for current chunk
-        images = mrc.data[start_index:end_index]
-
-        # Bin images
-        binned_images = np.mean(images.reshape((-1, 2, x_size, y_size)), axis=1)
-
-        # Write binned images to new MRC stack file
-        with mrcfile.new(f'chunk_{i}.mrcs', overwrite=True) as new_mrc:
-            new_mrc.set_data(binned_images.astype(np.float16))
+        start_index = i * chunk_size
+        end_index = start_index + chunk_size
+        chunk_data = data[:, :, start_index:end_index]
+        chunk_filename = os.path.join(output_dir, f"chunk_{i+1}.mrcs")
+        with mrcfile.new(chunk_filename, overwrite=True) as mrc:
+            mrc.set_data(np.squeeze(chunk_data))
+            #mrc.set_header(mrc_header)
+            #mrc.header.nz = chunk_size
