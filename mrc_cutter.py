@@ -1,5 +1,5 @@
 """
-Steep Juiced
+Copyright 2022 Steep Juiced
 This script uses the 'mrcfile' library to read and write MRC files. 
 It prompts the user to enter the number of chunks to split the stack into,
 calculates the length of each chunk, and hen bins the data into the desired number 

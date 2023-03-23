@@ -19,4 +19,4 @@ with mrcfile.open(args.input, permissive=True) as mrc:
     print(f'nx : {mrc.header.nx}')
     print(f'ny : {mrc.header.ny}')
     print(f'nz : {mrc.header.nz}')
-    mrc.print_header()
+    #mrc.print_header()
