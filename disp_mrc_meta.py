@@ -17,3 +17,5 @@ args = parser.parse_args()
 with mrcfile.open(args.input, permissive=True) as mrc:
     # print the header information
     print(f'nx : {mrc.header.nx}')
+    print(f'ny : {mrc.header.ny}')
+    print(f'nz : {mrc.header.nz}')
